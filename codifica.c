@@ -12,6 +12,7 @@ typedef struct compactadora Compactadora;
 
 void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v);
 void descompacta(FILE *arqBin, FILE *arqTexto, struct compactadora *v);
+int verificaFrequencias(unsigned int *frequencias, char *caracteres,FILE *arqTexto);
 
 #endif
 
@@ -42,11 +43,10 @@ int main(void) {
 }
 
 void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v){
-  char simbolo;
   char caracteres[32];
   unsigned int frequencias[32];
-  int contaChar = 0;
-  int verificaChar = 0;
+  
+  
 
   for(int i = 0; i<32; i++)
     {
@@ -54,6 +54,22 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v){
       frequencias[i] = 0;
     }
   
+  int qtdChar = verificaFrequencias(frequencias, caracteres, arqTexto);
+
+  for(int i = 0; i<qtdChar; i++)
+  {
+    printf("Caracter: %c Freq: %d\n", caracteres[i], frequencias[i]);
+  }
+
+    //Aqui os vetores vão estar inicializados com os valores de frequencias e caracteres
+    //Chamar as funcoes de min heap pra criar os Nodos e fazer a arvore
+}
+
+int verificaFrequencias(unsigned int *frequencias, char *caracteres,FILE *arqTexto)
+{
+  int contaChar;
+  char simbolo;
+  int flag = 0;
   while (!feof(arqTexto))
     {
       simbolo = fgetc(arqTexto);
@@ -62,7 +78,7 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v){
           if(simbolo == caracteres[j])
           {
             frequencias[j]++;
-              flag = !flag;
+            flag = !flag;
             break;
           }
         }
@@ -76,8 +92,5 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v){
       flag = 0;
     }
 
-    //Aqui os vetores vão estar inicializados com os valores de frequencias e caracteres
-    //Chamar as funcoes de min heap pra criar os Nodos e fazer a arvore
-
-    
+  return contaChar;
 }
