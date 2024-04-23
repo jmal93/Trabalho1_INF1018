@@ -1,3 +1,12 @@
 {
-  "files": {}
+  "files": {
+    "codifica.c": [
+      {
+        "id": "ab5405ec-5fb2-4f5c-871c-fe8e2df28958",
+        "line": 99,
+        "version": 4466,
+        "index": 2857
+      }
+    ]
+  }
 }
