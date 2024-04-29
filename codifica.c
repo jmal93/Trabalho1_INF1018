@@ -22,7 +22,7 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v)
             if (simbolo == v[i].simbolo)
             {
                 char *codigoBin = intPraBin(v[i].codigo, v[i].tamanho);
-                tamanhoBin += v[i].tamanho + 1;
+                tamanhoBin += v[i].tamanho;
                 bin = (char *)realloc(bin, tamanhoBin * sizeof(char));
                 strcat(bin, codigoBin);
                 break;
@@ -31,11 +31,11 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v)
     }
 
     char *codigoBin = intPraBin(v[31].codigo, v[31].tamanho);
-    tamanhoBin += v[31].tamanho + 1;
+    tamanhoBin += v[31].tamanho;
     bin = (char *)realloc(bin, tamanhoBin * sizeof(char));
     strcat(bin, codigoBin);
-    printf("string: %s\n", codigoBin);
-    printf("tamanho da string: %ld\ntamanho da variável: %ld\n", strlen(bin), sizeof(bin));
+    printf("string: %s\n", bin);
+    printf("tamanho da string: %ld\ntamanho da variável: %d\n", strlen(bin), tamanhoBin);
     escreveBitsNoFile(bin, strlen(bin), arqBin);
 }
 void descompacta(FILE *arqBin, FILE *arqTexto, struct compactadora *v)
