@@ -9,24 +9,30 @@ void lebyte(FILE* file); // Faz o dump da sequência de bits do arquivo binario
 
 // Precisamos resolver o problema de tamanho (bin[100])...
 void compacta(FILE* arqTexto, FILE* arqBin, struct compactadora* v) {
-    char simbolo;
-    unsigned int codigo;
-    char bin[1000] = "";
-  
-    while (!feof(arqTexto)) {
-        simbolo = fgetc(arqTexto);
-        for (int i = 31; i >= 0; i--) {
-            if (simbolo == v[i].simbolo) {
-                char* codigoBin = intPraBin(v[i].codigo, v[i].tamanho);;
-                strcat(bin, codigoBin);
-                break;
-            }
-        }
-    }
+  char simbolo;
+  int qtdElementos;
+  unsigned int codigo;
+  char bin[1000] = "";
 
-    char* codigoBin = intPraBin(v[31].codigo, v[31].tamanho);
-    strcat(bin, codigoBin);
-    escreveBitsNoFile(bin, strlen(bin), arqBin);
+  //Ler o texto pra ver quantos char tem
+  while ((simbolo = fgetc(arqTexto)) != EOF)
+    qtdElementos++;
+
+
+  while (!feof(arqTexto)) {
+      simbolo = fgetc(arqTexto);
+      for (int i = 31; i >= 0; i--) {
+          if (simbolo == v[i].simbolo) {
+              char* codigoBin = intPraBin(v[i].codigo, v[i].tamanho);;
+              strcat(bin, codigoBin);
+              break;
+          }
+      }
+  }
+
+  char* codigoBin = intPraBin(v[31].codigo, v[31].tamanho);
+  strcat(bin, codigoBin);
+  escreveBitsNoFile(bin, strlen(bin), arqBin);
 }
 void descompacta(FILE* arqBin, FILE* arqTexto, struct compactadora* v){
   unsigned int byte;
