@@ -12,30 +12,28 @@ void escreveByte(char *byte, FILE *arq)
     char c = 0x00;
     for (int i = 0; i < 8; i++)
     {
-        c = ((c << 1) | byte[i] - '0');
+        c = ((c << 1) | (byte[i] - '0'));
     }
     fwrite(&c, 1, 1, arq);
+    byte[0] = '\0';
 }
 
-void escreveResto(char *byte, char *resto)
+char *completaByte(char *byte, char *resto)
 {
-    int i = 0;
-    while (byte[i + 8])
+    for (int i = strlen(byte); i < 8 && *resto; i++)
     {
-        resto[i] = byte[i + 8];
-        i++;
+        byte[i] = *resto;
+        resto++;
     }
-    byte[8] = '\0';
-    resto[i] = '\0';
+
+    return resto;
 }
+
 // Precisamos resolver o problema de tamanho (bin[100])...
 void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v)
 {
     char simbolo;
-    unsigned int codigo;
-    char byte[16], resto[8];
-    byte[0] = '\0';
-    resto[0] = '\0';
+    char byte[9] = "", *codigoBin;
 
     while (!feof(arqTexto))
     {
@@ -44,24 +42,30 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v)
         {
             if (simbolo == v[i].simbolo)
             {
-                char *codigoBin = intPraBin(v[i].codigo, v[i].tamanho);
-                strcat(byte, codigoBin);
-                if (strlen(byte) >= 8)
+                codigoBin = intPraBin(v[i].codigo, v[i].tamanho);
+                while ((strlen(byte) + strlen(codigoBin)) > 8 && (strlen(byte) != 8))
                 {
-                    if (strlen(byte) > 8)
-                        escreveResto(byte, resto);
+                    codigoBin = completaByte(byte, codigoBin);
                     escreveByte(byte, arqBin);
-                    printf("%s\n", byte);
-                    byte[0] = '\0';
                 }
-                if (strlen(resto) > 0)
+                strcat(byte, codigoBin);
+                if (strlen(byte) == 8)
                 {
-                    strcpy(byte, resto);
-                    resto[0] = '\0';
+                    escreveByte(byte, arqBin);
                 }
                 break;
             }
         }
+    }
+    codigoBin = intPraBin(v[31].codigo, v[31].tamanho);
+    while ((strlen(byte) + strlen(codigoBin)) > 8 && (strlen(byte) != 8))
+    {
+        codigoBin = completaByte(byte, codigoBin);
+        escreveByte(byte, arqBin);
+    }
+    if (strlen(byte) <= 8)
+    {
+        escreveByte(byte, arqBin);
     }
 }
 void descompacta(FILE *arqBin, FILE *arqTexto, struct compactadora *v)
