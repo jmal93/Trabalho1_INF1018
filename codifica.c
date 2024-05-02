@@ -19,8 +19,8 @@ void escreveByte(char *byte, FILE *arq) {
   byte[0] = '\0';
 }
 
-char *completaByte(char *byte, char *resto) {
-  for (int i = strlen(byte); i < 8 && *resto; i++) {
+char *completaByte(char *byte, char *resto, int n) {
+  for (int i = strlen(byte); i < n && *resto; i++) {
     byte[i] = *resto;
     resto++;
   }
@@ -38,8 +38,9 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v) {
     for (int i = 31; i >= 0; i--) {
       if (simbolo == v[i].simbolo) {
         codigoBin = intPraBin(v[i].codigo, v[i].tamanho);
+        printf("%s ", codigoBin);
         while ((strlen(byte) + strlen(codigoBin)) > 8 && (strlen(byte) != 8)) {
-          codigoBin = completaByte(byte, codigoBin);
+          codigoBin = completaByte(byte, codigoBin, 8);
           escreveByte(byte, arqBin);
         }
         strcat(byte, codigoBin);
@@ -52,7 +53,7 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v) {
   }
   codigoBin = intPraBin(v[31].codigo, v[31].tamanho);
   while ((strlen(byte) + strlen(codigoBin)) > 8 && (strlen(byte) != 8)) {
-    codigoBin = completaByte(byte, codigoBin);
+    codigoBin = completaByte(byte, codigoBin, 8);
     escreveByte(byte, arqBin);
   }
   if (strlen(codigoBin) <= 8 && strlen(codigoBin) > 0) {
@@ -63,7 +64,7 @@ void compacta(FILE *arqTexto, FILE *arqBin, struct compactadora *v) {
 void descompacta(FILE *arqBin, FILE *arqTexto, struct compactadora *v) {
   int maior = 0, menor = v[0].tamanho;
   unsigned int byte;
-  char bits[10000] = "";
+
   rewind(arqBin);
 
   for (int i = 0; i < 32; i++) {
@@ -72,26 +73,56 @@ void descompacta(FILE *arqBin, FILE *arqTexto, struct compactadora *v) {
     if (v[i].tamanho < menor && v[i].tamanho != 0)
       menor = v[i].tamanho;
   }
-  while (!feof(arqBin)) {
-    fread(&byte, sizeof(unsigned char), 1, arqBin);
-    printf("%02x\n", byte);
-    char *codigoBin = intPraBin(byte, 8);
-    strcat(bits, codigoBin);
-    if (byte == 0)
-      break;
-  }
+  printf("maior: %d\n", maior);
 
-  char buffer[10000] = "";
-  for (int i = 0; i < strlen(bits); i++) {
-    char bit = bits[i];
-    strcat(buffer, &bit);
-    for (int j = 0; j < 32; j++) {
-      if (!strcmp(buffer, intPraBin(v[j].codigo, v[j].tamanho))) {
-        fputc(v[j].simbolo, arqTexto);
-        strcpy(buffer, "\0");
-        break;
+  char *bits = (char *)malloc(maior + 1);
+  char *buffer = (char *)malloc(maior + 1);
+  char *codigoBin;
+  while (!feof(arqBin)) {
+    printf("a\n");
+    fread(&byte, sizeof(unsigned char), 1, arqBin);
+    printf("Leu o arquivo\n");
+    
+    codigoBin = intPraBin(byte, 8);
+    printf("Soma de len: %d\n", strlen(bits) + strlen(codigoBin));
+    if (strlen(bits) + strlen(codigoBin) >= maior) {
+      printf("NAo cabe na bits\n");
+      codigoBin = completaByte(bits, codigoBin, maior);
+    } else {
+      printf("cabe na bits\n");
+      strcat(bits, codigoBin);
+    }
+    if (strlen(bits) > 0 && atoi(bits) == 0)
+      break;
+    printf("Strlen bits: %d\n", strlen(bits));
+    printf("codigoBin: %s\tbits: %s\n", codigoBin, bits);
+    // Analise bits
+    for (int i = 0; i < strlen(bits) && strlen(bits) == maior; i++) {
+      char bit[2];
+      bit[1] = '\0';
+      bit[0] = bits[i];
+      strcat(buffer, bit);
+      if (i >= menor - 1) {
+        for (int j = 0; j < 32; j++) {
+          if (!strcmp(buffer, intPraBin(v[j].codigo, v[j].tamanho))) {
+            printf("Caractere: %c\nCodigo: %s\n", v[j].simbolo, intPraBin(v[j].codigo, v[j].tamanho));
+            fputc(v[j].simbolo, arqTexto);
+            buffer[0] = '\0';
+            break;
+          }
+        }
       }
     }
+    bits[0] = '\0';
+    if (strlen(buffer) > 0) {
+      strcpy(bits, buffer);
+      buffer[0] = '\0';
+    }
+    if (strlen(codigoBin) > 0) {
+      strcat(bits, codigoBin);
+    }
+    printf("Bits: %s\n", bits);
+    printf("\n");
   }
 }
 

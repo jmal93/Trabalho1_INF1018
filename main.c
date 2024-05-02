@@ -14,10 +14,9 @@ int main(void) {
       {0, 0, 0},    {4, 0, 12}};
   FILE *entradaTexto = fopen("entradaTexto.txt", "r");
   FILE *saidaTexto = fopen("saidaTexto.txt", "w");
-  FILE* Binario = fopen("Binario.bin", "rb+");
+  FILE *Binario = fopen("Binario.bin", "rb+");
 
-  if(!entradaTexto || !saidaTexto || !Binario)
-  {
+  if (!entradaTexto || !saidaTexto || !Binario) {
     fprintf(stderr, "Erro ao abrir o arquivo\n");
     exit(1);
   }
