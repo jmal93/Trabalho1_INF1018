@@ -81,20 +81,21 @@ void descompacta(FILE *arqBin, FILE *arqTexto, struct compactadora *v) {
   while (!feof(arqBin)) {
     printf("a\n");
     fread(&byte, sizeof(unsigned char), 1, arqBin);
-    printf("Leu o arquivo\n");
-    
     codigoBin = intPraBin(byte, 8);
     printf("Soma de len: %d\n", strlen(bits) + strlen(codigoBin));
     if (strlen(bits) + strlen(codigoBin) >= maior) {
-      printf("NAo cabe na bits\n");
       codigoBin = completaByte(bits, codigoBin, maior);
     } else {
-      printf("cabe na bits\n");
       strcat(bits, codigoBin);
     }
-    if (strlen(bits) > 0 && atoi(bits) == 0)
+    if (strlen(bits) == 12 && atoi(bits) == 0)
+    {
+      printf("%s\n", bits);
+      printf("Break\n");
       break;
-    printf("Strlen bits: %d\n", strlen(bits));
+    }
+      
+    printf("Strlen bits: %ld\n", strlen(bits));
     printf("codigoBin: %s\tbits: %s\n", codigoBin, bits);
     // Analise bits
     for (int i = 0; i < strlen(bits) && strlen(bits) == maior; i++) {
@@ -113,16 +114,22 @@ void descompacta(FILE *arqBin, FILE *arqTexto, struct compactadora *v) {
         }
       }
     }
-    bits[0] = '\0';
-    if (strlen(buffer) > 0) {
-      strcpy(bits, buffer);
-      buffer[0] = '\0';
+    if(strlen(bits) == maior)
+    {
+        bits[0] = '\0';
+        if (strlen(buffer) > 0) {
+          printf("Concatena a buffer\n");
+          strcpy(bits, buffer);
+          buffer[0] = '\0';
+        }
+        if (strlen(codigoBin) > 0) {
+          printf("Concatena a codigoBin\n");
+          strcat(bits, codigoBin);
+        }
+        printf("Bits: %s\n", bits);
+        printf("\n");
     }
-    if (strlen(codigoBin) > 0) {
-      strcat(bits, codigoBin);
-    }
-    printf("Bits: %s\n", bits);
-    printf("\n");
+    
   }
 }
 
